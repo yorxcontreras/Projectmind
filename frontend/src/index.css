@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-pm-navy: #0b0c10;
+  --color-pm-purple: #6d28d9;
+  --color-pm-input: #f0f2f5;
+  --color-pm-page: #f4f6f9;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-pm-page);
+  color: #111827;
+}
