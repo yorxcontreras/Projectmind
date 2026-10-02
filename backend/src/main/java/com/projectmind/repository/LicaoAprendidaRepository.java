@@ -14,7 +14,7 @@ public interface LicaoAprendidaRepository extends JpaRepository<LicaoAprendida, 
     // Busca lições aprendidas por categoria (ex: "Riscos", "Cronograma")
     List<LicaoAprendida> findByCategoria(String categoria);
 
-    // Método preparado para a busca por similaridade de embeddings via PGVector no PostgreSQL
+    // Método preparado para a busca por similaridade de embeddings via PGVectorz no PostgreSQL
     @Query(value = "SELECT * FROM licoes_aprendidas_vetores ORDER BY vetor_embedding <=> CAST(:embedding AS vector) LIMIT :limite", nativeQuery = true)
     List<LicaoAprendida> buscarSimilaresPorVetor(@Param("embedding") String embedding, @Param("limite") int limite);
 }
