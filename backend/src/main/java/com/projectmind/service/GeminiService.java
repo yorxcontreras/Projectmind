@@ -23,7 +23,7 @@ public class GeminiService {
     @Value("${gemini.api.key:}")
     private String apiKey;
 
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent}")
     private String apiUrl;
 
     public GeminiService(RestTemplate restTemplate) {
@@ -97,9 +97,6 @@ public class GeminiService {
         }
 
         log.warn("Chave GEMINI_API_KEY não configurada.");
-        return "⚠️ A chave da API Gemini (GEMINI_API_KEY) ainda não foi inserida no backend.\n\n" +
-               "Para receber respostas dinâmicas em tempo real diretamente do Google Gemini (igual ao site do Gemini):\n" +
-               "1. Gere uma chave gratuita no Google AI Studio: https://aistudio.google.com/app/apikey\n" +
-               "2. Adicione a chave no arquivo `application.properties` na propriedade `gemini.api.key=SUA_CHAVE` ou defina a variável `$env:GEMINI_API_KEY=\"SUA_CHAVE\"` antes de rodar o servidor.";
+        return "⚠️ A chave da API Gemini não foi configurada no application.properties.";
     }
 }
