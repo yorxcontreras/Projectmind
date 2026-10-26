@@ -1,7 +1,7 @@
 package com.projectmind.controller;
 
 import com.projectmind.domain.Usuario;
-import com.projectmind.dto.ProjetoDTO; // Caso precise estender
+import com.projectmind.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,33 +14,53 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // Permite chamadas vindas do Frontend em React
 public class AuthController {
 
+    private final UsuarioService usuarioService;
+
+    public AuthController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
     // POST /api/auth/login
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
-        String email = loginData.get("email");
-        String senha = loginData.get("senha");
+        try {
+            String email = loginData != null ? loginData.get("email") : null;
+            String senha = loginData != null ? loginData.get("senha") : null;
 
-        // TODO: Substituir por chamada ao AuthService no futuro
-        if ("admin@projectmind.com".equals(email) && "123456".equals(senha)) {
+            Usuario usuario = usuarioService.fazerLogin(email, senha);
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Login realizado com sucesso");
-            response.put("token", "fake-jwt-token-projectmind");
-            response.put("userId", 1L);
-            response.put("nome", "Usuário Teste");
-            return ResponseEntity.ok(response);
-        }
+            response.put("token", "fake-jwt-token-projectmind-" + usuario.getId());
+            response.put("userId", usuario.getId());
+            response.put("id", usuario.getId());
+            response.put("nome", usuario.getNome());
+            response.put("email", usuario.getEmail());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Credenciais inválidas"));
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage(), "erro", e.getMessage()));
+        }
     }
 
     // POST /api/auth/register
     @PostMapping("/register")
     public ResponseEntity<?> cadastrar(@RequestBody Usuario usuario) {
-        // TODO: Salvar usuário no banco via UsuarioRepository
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Usuário cadastrado com sucesso!");
-        response.put("userId", 1L);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        try {
+            Usuario novoUsuario = usuarioService.cadastrar(usuario);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Usuário cadastrado com sucesso!");
+            response.put("userId", novoUsuario.getId());
+            response.put("id", novoUsuario.getId());
+            response.put("nome", novoUsuario.getNome());
+            response.put("email", novoUsuario.getEmail());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage(), "erro", e.getMessage()));
+        }
     }
 }

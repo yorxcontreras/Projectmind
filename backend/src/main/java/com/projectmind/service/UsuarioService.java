@@ -1,0 +1,84 @@
+package com.projectmind.service;
+
+import com.projectmind.domain.Usuario;
+import com.projectmind.repository.UsuarioRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class UsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    // Salvar ou cadastrar novo usuário
+    public Usuario cadastrar(Usuario usuario) {
+        if (usuario == null) {
+            throw new RuntimeException("Dados do usuário não fornecidos!");
+        }
+
+        if (usuario.getNome() == null || usuario.getNome().trim().isEmpty()) {
+            throw new RuntimeException("O nome é obrigatório!");
+        }
+
+        if (usuario.getEmail() == null || usuario.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("O e-mail é obrigatório!");
+        }
+
+        if (usuario.getSenha() == null || usuario.getSenha().trim().isEmpty()) {
+            throw new RuntimeException("A senha é obrigatória!");
+        }
+
+        String emailFormatado = usuario.getEmail().trim().toLowerCase();
+        usuario.setEmail(emailFormatado);
+        usuario.setNome(usuario.getNome().trim());
+
+        if (usuarioRepository.existsByEmail(emailFormatado)) {
+            throw new RuntimeException("E-mail já cadastrado no sistema!");
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    // Método para validar o login
+    public Usuario fazerLogin(String email, String senha) {
+        if (email == null || email.trim().isEmpty() || senha == null || senha.trim().isEmpty()) {
+            throw new RuntimeException("E-mail e senha são obrigatórios!");
+        }
+
+        String emailFormatado = email.trim().toLowerCase();
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(emailFormatado);
+
+        // Fallback caso usuário tenha sido cadastrado mantendo maiúsculas
+        if (usuarioOpt.isEmpty()) {
+            usuarioOpt = usuarioRepository.findByEmail(email.trim());
+        }
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            if (usuario.getSenha() != null && usuario.getSenha().equals(senha.trim())) {
+                return usuario;
+            }
+        }
+
+        throw new RuntimeException("E-mail ou senha inválidos!");
+    }
+
+    public List<Usuario> listarTodos() {
+        return usuarioRepository.findAll();
+    }
+
+    public Optional<Usuario> buscarPorId(Long id) {
+        return usuarioRepository.findById(id);
+    }
+
+    public Optional<Usuario> buscarPorEmail(String email) {
+        if (email == null) return Optional.empty();
+        return usuarioRepository.findByEmail(email.trim().toLowerCase());
+    }
+}
