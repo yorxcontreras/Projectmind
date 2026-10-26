@@ -21,6 +21,7 @@ public class Projeto {
     private LocalDate dataInicio;
     private LocalDate dataFimPlanejada;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;

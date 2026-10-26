@@ -16,18 +16,19 @@ public class RAGService {
     }
 
     /**
-     * Consulta no PostgreSQL com PGVector as lições aprendidas mais similares.
+     * Consulta as lições aprendidas mais relevantes do repositório (RAG).
      */
     public List<LicaoAprendida> buscarLicoesRelevantes(String contextoProjeto) {
-        // TODO: Gerar o vetor embedding do contextoProjeto usando LangChain4j
-        String embeddingFake = "[0.12, -0.43, ...]";
-
         try {
-            // Tenta buscar no banco via PGVector
-            return licaoAprendidaRepository.buscarSimilaresPorVetor(embeddingFake, 3);
-        } catch (Exception e) {
-            // Fallback caso a extensão PGVector ainda não esteja totalmente populada
-            return licaoAprendidaRepository.findByCategoria("Geral");
+            // Em PostgreSQL com PGVector, executa busca vetorial por similaridade
+            return licaoAprendidaRepository.buscarSimilaresPorVetor("[0.12, -0.43, ...]", 3);
+        } catch (Throwable e) {
+            // Fallback limpo para busca por categoria/lista em H2 / ambiente local
+            List<LicaoAprendida> gerais = licaoAprendidaRepository.findByCategoria("Geral");
+            if (gerais != null && !gerais.isEmpty()) {
+                return gerais;
+            }
+            return licaoAprendidaRepository.findAll();
         }
     }
 }

@@ -20,6 +20,7 @@ public class Tarefa {
     @Column(length = 2)
     private String tipoDependencia; // TI, II, TT, IT
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_projeto")
     private Projeto projeto;

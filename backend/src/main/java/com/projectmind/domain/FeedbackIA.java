@@ -16,7 +16,7 @@ public class FeedbackIA {
     @Column(columnDefinition = "TEXT")
     private String sugestaoMelhoria;
 
-    @Column(columnDefinition = "JSONB")
+    @Column(columnDefinition = "TEXT")
     private String diagnosticoJson;
 
     private LocalDateTime dataAnalise;
