@@ -6,9 +6,13 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("pm_token");
+  const token = sessionStorage.getItem("pm_token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    if (token.startsWith("pm-token-")) {
+      const uid = token.replace("pm-token-", "").trim();
+      config.headers["X-User-Id"] = uid;
+    }
   }
   return config;
 });

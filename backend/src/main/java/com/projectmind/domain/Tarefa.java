@@ -30,6 +30,11 @@ public class Tarefa {
     @Column(name = "id_predecessora")
     private List<Long> idsPredecessoras;
 
+    // Acompanhamento de execução (base da análise de atraso e das previsões)
+    private Integer percentualConcluido; // 0 a 100 (nulo = 0)
+    private java.time.LocalDate dataInicioReal;
+    private java.time.LocalDate dataConclusaoReal;
+
     public Tarefa() {}
 
     public Long getId() { return id; }
@@ -52,4 +57,13 @@ public class Tarefa {
 
     public List<Long> getIdsPredecessoras() { return idsPredecessoras; }
     public void setIdsPredecessoras(List<Long> idsPredecessoras) { this.idsPredecessoras = idsPredecessoras; }
+
+    public Integer getPercentualConcluido() { return percentualConcluido; }
+    public void setPercentualConcluido(Integer percentualConcluido) { this.percentualConcluido = percentualConcluido; }
+
+    public java.time.LocalDate getDataInicioReal() { return dataInicioReal; }
+    public void setDataInicioReal(java.time.LocalDate dataInicioReal) { this.dataInicioReal = dataInicioReal; }
+
+    public java.time.LocalDate getDataConclusaoReal() { return dataConclusaoReal; }
+    public void setDataConclusaoReal(java.time.LocalDate dataConclusaoReal) { this.dataConclusaoReal = dataConclusaoReal; }
 }

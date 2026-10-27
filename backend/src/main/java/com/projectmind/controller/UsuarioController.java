@@ -80,4 +80,36 @@ public class UsuarioController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("erro", "Usuário não encontrado")));
     }
+
+    // Atualizar dados do usuário: PUT /api/usuarios/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
+        try {
+            Usuario atualizado = usuarioService.atualizar(id, usuario);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", atualizado.getId());
+            response.put("userId", atualizado.getId());
+            response.put("nome", atualizado.getNome());
+            response.put("email", atualizado.getEmail());
+            response.put("message", "Informações atualizadas com sucesso!");
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("erro", e.getMessage(), "error", e.getMessage()));
+        }
+    }
+
+    // Excluir conta do usuário: DELETE /api/usuarios/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletar(@PathVariable Long id) {
+        try {
+            usuarioService.deletar(id);
+            return ResponseEntity.ok(Map.of("message", "Conta excluída com sucesso!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("erro", e.getMessage(), "error", e.getMessage()));
+        }
+    }
 }

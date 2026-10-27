@@ -26,6 +26,7 @@ public class Projeto {
     @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    @OrderBy("id ASC")
     @OneToMany(mappedBy = "projeto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarefa> tarefas;
 

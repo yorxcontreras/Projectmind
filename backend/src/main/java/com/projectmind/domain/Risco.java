@@ -13,12 +13,13 @@ public class Risco {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    private Double probabilidade;
-    private Double impacto;
+    private Double probabilidade; // 0 a 1
+    private Double impacto; // atraso potencial no término do projeto, em dias
 
     @Column(length = 20)
     private String nivelSeveridade; // Baixo, Médio, Alto, Crítico
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_projeto")
     private Projeto projeto;

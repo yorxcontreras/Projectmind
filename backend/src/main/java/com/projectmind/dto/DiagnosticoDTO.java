@@ -12,6 +12,7 @@ public class DiagnosticoDTO {
     private List<String> sugestoesIA;
     private List<String> licoesAprendidasRelevantes;
     private LocalDateTime dataGeracao;
+    private AnaliseProjetoDTO analise;
 
     public DiagnosticoDTO() {
         this.dataGeracao = LocalDateTime.now();
@@ -37,4 +38,7 @@ public class DiagnosticoDTO {
 
     public LocalDateTime getDataGeracao() { return dataGeracao; }
     public void setDataGeracao(LocalDateTime dataGeracao) { this.dataGeracao = dataGeracao; }
+
+    public AnaliseProjetoDTO getAnalise() { return analise; }
+    public void setAnalise(AnaliseProjetoDTO analise) { this.analise = analise; }
 }

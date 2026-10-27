@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { chatIA } from "../services/auditoriaService.js";
 import { listarProjetos } from "../services/projetoService.js";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Brain, Send, FileText, Palette, Network, BookOpen, Calendar, Shield, AlertTriangle, LogOut } from "lucide-react";
+import { Brain, Send, FileText, Palette, Network, BookOpen, Calendar, Shield, AlertTriangle, LogOut, User } from "lucide-react";
 
 const sidebarButtons = [
   { label: "Arquivos", icon: FileText },
@@ -17,7 +17,7 @@ const sidebarButtons = [
 
 function ChatPage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [projetos, setProjetos] = useState([]);
   const [selectedProjetoId, setSelectedProjetoId] = useState("");
   const [pergunta, setPergunta] = useState("");
@@ -34,7 +34,8 @@ function ChatPage() {
   useEffect(() => {
     async function carregarProjetos() {
       try {
-        const dados = await listarProjetos();
+        const usuarioId = user?.id || user?.userId;
+        const dados = await listarProjetos(usuarioId);
         setProjetos(dados || []);
         if (dados && dados.length > 0) {
           setSelectedProjetoId(dados[0].id.toString());
@@ -44,7 +45,7 @@ function ChatPage() {
       }
     }
     carregarProjetos();
-  }, []);
+  }, [user?.id, user?.userId]);
 
   useEffect(() => {
     endOfChatRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,6 +55,10 @@ function ChatPage() {
     e?.preventDefault();
     if (!pergunta.trim() || carregando) return;
     
+    // Identifica se é a primeira mensagem enviada pelo usuário no chat
+    const jaEnviouAntes = mensagens.some((m) => m.remetente === "usuario");
+    const primeiraMensagem = !jaEnviouAntes;
+
     const userMessage = {
       id: Date.now(),
       remetente: "usuario",
@@ -69,11 +74,15 @@ function ChatPage() {
       const res = await chatIA({
         projetoId: selectedProjetoId ? parseInt(selectedProjetoId) : null,
         pergunta: promptAtual,
+        primeiraMensagem: primeiraMensagem,
       });
+
+      const textoResposta = res?.resposta || "Não recebi uma resposta válida da IA.";
+
       const iaMessage = {
         id: Date.now() + 1,
         remetente: "ia",
-        texto: res?.resposta || "Não recebi uma resposta válida da IA.",
+        texto: textoResposta || "Não recebi uma resposta válida da IA.",
       };
       setMensagens((prev) => [...prev, iaMessage]);
     } catch (err) {
@@ -112,11 +121,15 @@ function ChatPage() {
       {/* Header com botões de navegação idênticos ao protótipo */}
       <header className="bg-white border-b border-gray-200 py-4 px-6 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+          <div
+            onClick={() => navigate("/projetos")}
+            className="flex items-center gap-3 cursor-pointer group"
+            title="Ir para a página inicial (Meus Projetos)"
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-sm group-hover:scale-105 transition">
               <Brain className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">ProjectMind</h1>
+            <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition">ProjectMind</h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -144,6 +157,15 @@ function ChatPage() {
                 Ver Análise Completa
               </button>
             )}
+            <div
+              onClick={() => navigate("/perfil")}
+              className="flex items-center gap-2 cursor-pointer pl-2 border-l border-gray-200 group"
+              title="Meu Perfil - Editar informações e excluir conta"
+            >
+              <div className="w-9 h-9 bg-blue-600 group-hover:bg-blue-700 rounded-full flex items-center justify-center text-white transition shadow-sm">
+                <User className="h-4 w-4" />
+              </div>
+            </div>
             <button
               onClick={() => {
                 logout();

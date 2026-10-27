@@ -81,4 +81,37 @@ public class UsuarioService {
         if (email == null) return Optional.empty();
         return usuarioRepository.findByEmail(email.trim().toLowerCase());
     }
+
+    @org.springframework.transaction.annotation.Transactional
+    public Usuario atualizar(Long id, Usuario dadosAtualizados) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+
+        if (dadosAtualizados.getNome() != null && !dadosAtualizados.getNome().trim().isEmpty()) {
+            usuario.setNome(dadosAtualizados.getNome().trim());
+        }
+
+        if (dadosAtualizados.getEmail() != null && !dadosAtualizados.getEmail().trim().isEmpty()) {
+            String novoEmail = dadosAtualizados.getEmail().trim().toLowerCase();
+            if (!novoEmail.equalsIgnoreCase(usuario.getEmail())) {
+                if (usuarioRepository.existsByEmail(novoEmail)) {
+                    throw new RuntimeException("Este e-mail já está em uso por outro usuário!");
+                }
+                usuario.setEmail(novoEmail);
+            }
+        }
+
+        if (dadosAtualizados.getSenha() != null && !dadosAtualizados.getSenha().trim().isEmpty()) {
+            usuario.setSenha(dadosAtualizados.getSenha().trim());
+        }
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deletar(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+        usuarioRepository.delete(usuario);
+    }
 }

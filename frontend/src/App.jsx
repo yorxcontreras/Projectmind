@@ -6,19 +6,22 @@ import ChatPage from "./pages/ChatPage.jsx";
 import MeusProjetosPage from "./pages/MeusProjetosPage.jsx";
 import ProjetoPage from "./pages/ProjetoPage.jsx";
 import AnaliseCompletaPage from "./pages/AnaliseCompletaPage.jsx";
+import PerfilPage from "./pages/PerfilPage.jsx";
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/cadastro" element={<CadastroPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<ChatPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/projetos" element={<MeusProjetosPage />} />
         <Route path="/projetos/:id" element={<ProjetoPage />} />
         <Route path="/projetos/:id/analise" element={<AnaliseCompletaPage />} />
+        <Route path="/perfil" element={<PerfilPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

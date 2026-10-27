@@ -5,7 +5,11 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem("pm_user");
+      // Limpa qualquer dado residual antigo de localStorage para não reabrir sessões antigas
+      localStorage.removeItem("pm_user");
+      localStorage.removeItem("pm_token");
+
+      const savedUser = sessionStorage.getItem("pm_user");
       return savedUser ? JSON.parse(savedUser) : null;
     } catch {
       return null;
@@ -15,9 +19,9 @@ export function AuthProvider({ children }) {
   const login = (userData) => {
     setUser(userData);
     try {
-      localStorage.setItem("pm_user", JSON.stringify(userData));
+      sessionStorage.setItem("pm_user", JSON.stringify(userData));
       if (userData?.token) {
-        localStorage.setItem("pm_token", userData.token);
+        sessionStorage.setItem("pm_token", userData.token);
       }
     } catch (e) {
       console.error("Erro ao salvar sessão:", e);
@@ -27,11 +31,25 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     try {
+      sessionStorage.removeItem("pm_user");
+      sessionStorage.removeItem("pm_token");
       localStorage.removeItem("pm_user");
       localStorage.removeItem("pm_token");
     } catch (e) {
       console.error("Erro ao limpar sessão:", e);
     }
+  };
+
+  const atualizarUsuarioContext = (dadosAtualizados) => {
+    setUser((prev) => {
+      const updated = { ...prev, ...dadosAtualizados };
+      try {
+        sessionStorage.setItem("pm_user", JSON.stringify(updated));
+      } catch (e) {
+        console.error("Erro ao salvar dados atualizados do usuário:", e);
+      }
+      return updated;
+    });
   };
 
   return (
@@ -41,6 +59,7 @@ export function AuthProvider({ children }) {
         setUser,
         login,
         logout,
+        atualizarUsuarioContext,
         isAuthenticated: !!user,
       }}
     >

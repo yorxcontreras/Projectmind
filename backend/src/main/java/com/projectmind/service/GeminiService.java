@@ -10,8 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.annotation.PostConstruct;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 @Service
 public class GeminiService {
@@ -20,14 +23,40 @@ public class GeminiService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${gemini.api.key:}")
-    private String apiKey;
-
     @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent}")
     private String apiUrl;
 
+    /**
+     * Chave lida diretamente do application.properties para evitar que variáveis
+     * de ambiente do Windows (GEMINI_API_KEY) sobrescrevam o valor configurado.
+     */
+    private String apiKey;
+
     public GeminiService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    @PostConstruct
+    public void init() {
+        // Lê a chave diretamente do arquivo application.properties,
+        // ignorando variáveis de ambiente que o Spring Boot poderia sobrescrever.
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+            if (is != null) {
+                Properties props = new Properties();
+                props.load(is);
+                this.apiKey = props.getProperty("gemini.api.key", "").trim();
+                String maskedKey = this.apiKey.length() > 6
+                        ? "..." + this.apiKey.substring(this.apiKey.length() - 6)
+                        : "(vazia)";
+                log.info("GeminiService inicializado com chave do application.properties terminada em [{}]", maskedKey);
+            } else {
+                log.warn("Arquivo application.properties não encontrado no classpath!");
+                this.apiKey = "";
+            }
+        } catch (Exception e) {
+            log.error("Erro ao ler application.properties: {}", e.getMessage());
+            this.apiKey = "";
+        }
     }
 
     /**
@@ -43,9 +72,12 @@ public class GeminiService {
 
         if (!keyToUse.isEmpty()) {
             int maxTentativas = 3;
+            String maskedKey = keyToUse.length() > 6 
+                    ? "..." + keyToUse.substring(keyToUse.length() - 6) 
+                    : "***";
             for (int tentativa = 1; tentativa <= maxTentativas; tentativa++) {
                 try {
-                    log.info("Enviando requisição diretamente para a API Google Gemini (tentativa {}/{})...", tentativa, maxTentativas);
+                    log.info("Enviando requisição diretamente para a API Google Gemini (tentativa {}/{}) com chave terminada em [{}]...", tentativa, maxTentativas, maskedKey);
                     String fullUrl = apiUrl + "?key=" + keyToUse;
 
                     HttpHeaders headers = new HttpHeaders();
@@ -53,7 +85,11 @@ public class GeminiService {
 
                     Map<String, Object> part = Map.of("text", promptCompleto);
                     Map<String, Object> content = Map.of("parts", List.of(part));
-                    Map<String, Object> requestBody = Map.of("contents", List.of(content));
+                    Map<String, Object> generationConfig = Map.of("temperature", 0.3);
+                    Map<String, Object> requestBody = Map.of(
+                        "contents", List.of(content),
+                        "generationConfig", generationConfig
+                    );
 
                     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
                     ResponseEntity<Map> response = restTemplate.postForEntity(fullUrl, entity, Map.class);

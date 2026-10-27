@@ -22,7 +22,7 @@ public class Usuario {
     private String senha;
 
     @com.fasterxml.jackson.annotation.JsonIgnore
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Projeto> projetos;
 
     public Usuario() {}

@@ -5,6 +5,7 @@ public class PromptRequestDTO {
     private Long projetoId;
     private String pergunta;
     private String contextoAdicional;
+    private Boolean primeiraMensagem = true;
 
     public PromptRequestDTO() {}
 
@@ -30,5 +31,13 @@ public class PromptRequestDTO {
     
     public void setContextoAdicional(String contextoAdicional) { 
         this.contextoAdicional = contextoAdicional; 
+    }
+
+    public Boolean getPrimeiraMensagem() {
+        return primeiraMensagem;
+    }
+
+    public void setPrimeiraMensagem(Boolean primeiraMensagem) {
+        this.primeiraMensagem = primeiraMensagem;
     }
 }
