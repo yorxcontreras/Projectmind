@@ -1,22 +1,47 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Brain } from "lucide-react";
+import { login as loginService } from "../services/authService.js";
+import { Brain, AlertCircle, Loader2 } from "lucide-react";
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
 
-  const handleLogin = (event) => {
+  const handleLogin = async (event) => {
     event.preventDefault();
-    login({
-      id: 1,
-      nome: "Maria Silva",
-      email: email || "maria.silva@empresa.com",
-    });
-    navigate("/projetos");
+    setErro("");
+
+    if (!email.trim() || !senha.trim()) {
+      setErro("Preencha o e-mail e a senha.");
+      return;
+    }
+
+    setCarregando(true);
+
+    try {
+      // Comunicação com o backend: POST /api/usuarios/login
+      const dadosUsuario = await loginService({
+        email: email.trim(),
+        senha: senha,
+      });
+
+      login(dadosUsuario);
+      navigate("/projetos");
+    } catch (err) {
+      const mensagemErro =
+        err.response?.data?.erro ||
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "E-mail ou senha inválidos!";
+      setErro(mensagemErro);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -38,7 +63,14 @@ function LoginPage() {
             <h2 className="text-2xl font-bold text-gray-900">Login</h2>
             <p className="text-sm text-gray-500 mt-1">Acesse sua conta para gerenciar projetos com IA</p>
           </div>
-          
+
+          {erro && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+              <span>{erro}</span>
+            </div>
+          )}
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email:</label>
@@ -49,6 +81,7 @@ function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
+                disabled={carregando}
               />
             </div>
 
@@ -61,14 +94,23 @@ function LoginPage() {
                 onChange={(e) => setSenha(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
+                disabled={carregando}
               />
             </div>
 
             <button
               type="submit"
-              className="w-full rounded-xl p-3 bg-slate-900 hover:bg-slate-800 text-white font-medium transition shadow-sm"
+              disabled={carregando}
+              className="w-full rounded-xl p-3 bg-slate-900 hover:bg-slate-800 text-white font-medium transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Entrar
+              {carregando ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
             </button>
           </form>
 

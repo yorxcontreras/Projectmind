@@ -1,11 +1,45 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Brain } from "lucide-react";
+import { register } from "../services/authService.js";
+import { Brain, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 function CadastroPage() {
   const navigate = useNavigate();
-  const handleSubmit = (event) => {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    navigate("/login");
+    setErro("");
+    setSucesso("");
+
+    if (!nome.trim() || !email.trim() || !senha.trim()) {
+      setErro("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    setCarregando(true);
+
+    try {
+      await register({ nome: nome.trim(), email: email.trim(), senha });
+      setSucesso("Conta criada com sucesso! Redirecionando para o login...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      const mensagemErro =
+        err.response?.data?.erro ||
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Erro ao cadastrar usuário. Tente novamente.";
+      setErro(mensagemErro);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -25,8 +59,22 @@ function CadastroPage() {
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Cadastro</h2>
-            <p className="text-sm text-gray-500 mt-1">Crie sua conta no ProjectMind</p>
+            <p className="text-sm text-gray-500 mt-1">Crie sua conta no ProjectMind para salvar seus dados</p>
           </div>
+
+          {erro && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+              <span>{erro}</span>
+            </div>
+          )}
+
+          {sucesso && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+              <span>{sucesso}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -34,8 +82,11 @@ function CadastroPage() {
               <input
                 type="text"
                 placeholder="Seu nome completo"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
+                disabled={carregando}
               />
             </div>
             <div>
@@ -43,8 +94,11 @@ function CadastroPage() {
               <input
                 type="email"
                 placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
+                disabled={carregando}
               />
             </div>
             <div>
@@ -52,15 +106,26 @@ function CadastroPage() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                 required
+                disabled={carregando}
               />
             </div>
             <button
               type="submit"
-              className="w-full rounded-xl p-3 bg-slate-900 hover:bg-slate-800 text-white font-medium transition shadow-sm"
+              disabled={carregando}
+              className="w-full rounded-xl p-3 bg-slate-900 hover:bg-slate-800 text-white font-medium transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Criar conta
+              {carregando ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando dados...
+                </>
+              ) : (
+                "Criar conta"
+              )}
             </button>
           </form>
 

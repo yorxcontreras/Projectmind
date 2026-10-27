@@ -21,6 +21,7 @@ public class FeedbackIA {
 
     private LocalDateTime dataAnalise;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_projeto")
     private Projeto projeto;

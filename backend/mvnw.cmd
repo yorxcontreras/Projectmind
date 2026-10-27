@@ -27,6 +27,11 @@
 @REM   MVNW_VERBOSE - true: enable verbose log; others: silence the output
 @REM ----------------------------------------------------------------------------
 
+@IF EXIST "%USERPROFILE%\.jdks\jdk-21.0.12.1+1" (
+  @SET "JAVA_HOME=%USERPROFILE%\.jdks\jdk-21.0.12.1+1"
+  @SET "PATH=%USERPROFILE%\.jdks\jdk-21.0.12.1+1\bin;%PATH%"
+)
+
 @IF "%__MVNW_ARG0_NAME__%"=="" (SET __MVNW_ARG0_NAME__=%~nx0)
 @SET __MVNW_CMD__=
 @SET __MVNW_ERROR__=
@@ -147,7 +152,7 @@ if ($distributionSha256Sum) {
     Write-Error "Error: Failed to validate Maven distribution SHA-256, your Maven distribution might be compromised. If you updated your Maven version, you need to update the specified distributionSha256Sum property."
   }
 }
-'
+
 # unzip and move
 Expand-Archive "$TMP_DOWNLOAD_DIR/$distributionUrlName" -DestinationPath "$TMP_DOWNLOAD_DIR" | Out-Null
 
