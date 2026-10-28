@@ -25,6 +25,13 @@ public class Tarefa {
     @JoinColumn(name = "id_projeto")
     private Projeto projeto;
 
+    @ManyToOne
+    @JoinColumn(name = "id_sprint")
+    private Sprint sprint;
+
+    public Sprint getSprint() { return sprint; }
+    public void setSprint(Sprint sprint) { this.sprint = sprint; }
+
     @ElementCollection
     @CollectionTable(name = "dependencias_tarefas", joinColumns = @JoinColumn(name = "id_sucessora"))
     @Column(name = "id_predecessora")
